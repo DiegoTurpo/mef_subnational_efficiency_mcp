@@ -92,3 +92,16 @@ El proyecto se construye por componentes en branches `feature/*` y se integra a
 `feature/mcp-server-core` · `feature/data-snapshot-pipeline` ·
 `feature/historical-1964-paddle-ocr` · `feature/executor-dashboard-draft` ·
 `feature/evaluator-qa-refinement`
+
+---
+
+## Notas de ejecución
+
+- Los **Parquet procesados** (`data/processed/`) ya están versionados, así que el
+  dashboard funciona tras clonar sin reprocesar los GB de origen.
+- El **CSV crudo del MEF** (~2.66 GB) se descarga a una carpeta temporal del
+  sistema (fuera del repo) cuando se ejecuta el pipeline.
+- **PaddleOCR/CPU**: el código fija `FLAGS_use_mkldnn=0` automáticamente para
+  evitar un fallo de oneDNN en PaddlePaddle 3.x (no requiere acción manual).
+- El **reporte de auditoría** del Evaluator está en `docs/evaluator_report.md` y
+  se muestra en el Tab 4 del dashboard.

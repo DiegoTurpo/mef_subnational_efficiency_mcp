@@ -28,6 +28,28 @@ ANIO = 2025
 st.set_page_config(page_title="MEF · Auditoría de Eficiencia Subnacional",
                    layout="wide", page_icon="🇵🇪")
 
+# --- Estilos (inyectados por el Evaluator) ---
+st.markdown("""
+<style>
+:root { --rojo: #C8102E; --tinta: #1a1a1a; }
+.block-container { padding-top: 2.2rem; max-width: 1300px; }
+h1 { font-weight: 800; letter-spacing: -0.5px; }
+h2, h3 { color: var(--tinta); }
+[data-testid="stMetric"] {
+    background: #ffffff;
+    border: 1px solid #ececec;
+    border-left: 5px solid var(--rojo);
+    border-radius: 10px;
+    padding: 14px 18px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+[data-testid="stMetricValue"] { color: var(--rojo); font-weight: 700; }
+[data-testid="stMetricLabel"] { opacity: 0.75; }
+.stTabs [data-baseweb="tab-list"] { gap: 6px; }
+.stTabs [data-baseweb="tab"] { font-weight: 600; padding: 8px 14px; }
+</style>
+""", unsafe_allow_html=True)
+
 
 # --------------------------------------------------------------------------
 #  Carga de datos (cacheada — lee solo salidas pequeñas)
@@ -233,5 +255,19 @@ with tab4:
         st.markdown("Audita datos, optimiza con `@st.cache_data`, aplica estilos y "
                     "documenta bugs y mejoras.")
     st.divider()
-    st.info("📋 El reporte de auditoría del Evaluator (evolución draft → final) se "
-            "añade en el branch `feature/evaluator-qa-refinement`.")
+    # Interfaz de cambio de periodo (period-driven): los periodos disponibles se
+    # detectan por los Parquet de KPIs presentes en data/processed/.
+    periodos = sorted(p.stem.replace("kpis_", "")
+                      for p in PROCESSED.glob("kpis_*.parquet"))
+    st.selectbox(
+        "Periodo analizado", periodos or [str(ANIO)],
+        help="Genera nuevos periodos con: run executor_skill for period AAAA-MM",
+    )
+
+    st.divider()
+    st.markdown("### 📋 Reporte de Auditoría del Evaluator")
+    reporte = ROOT / "docs" / "evaluator_report.md"
+    if reporte.exists():
+        st.markdown(reporte.read_text(encoding="utf-8"))
+    else:
+        st.info("Aún no se ha generado el reporte de auditoría.")
