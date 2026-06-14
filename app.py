@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -69,6 +70,12 @@ def cargar_json(nombre: str) -> dict:
 @st.cache_data
 def cargar_geojson() -> dict:
     return json.loads(GEO.read_text(encoding="utf-8")) if GEO.exists() else {}
+
+
+@st.cache_data
+def cargar_vulnerabilidad() -> pd.DataFrame:
+    """Hogares del programa JUNTOS por departamento (proxy de vulnerabilidad)."""
+    return cargar_parquet("vulnerabilidad_juntos.parquet")
 
 
 def soles(x: float) -> str:
@@ -132,10 +139,11 @@ with tab1:
     st.subheader("📜 Digitalización Histórica — Cuenta General de la República 1964")
     resumen = cargar_json("ocr_1964_resumen.json")
     if resumen:
-        h1, h2, h3 = st.columns(3)
+        h1, h2, h3, h4 = st.columns(4)
         h1.metric("Páginas digitalizadas (OCR)", resumen.get("paginas_procesadas", 0))
         h2.metric("Cifras financieras extraídas", f"{resumen.get('cifras_extraidas', 0):,}")
         h3.metric("Mayor cifra detectada", soles(resumen.get("cifra_maxima", 0)))
+        h4.metric("Cifra mediana", soles(resumen.get("cifra_mediana", 0)))
         st.caption(
             f"Procesadas con PaddleOCR las páginas {resumen.get('rango_paginas', '')} "
             "del balance de 1964. La extracción se centra en las **cifras** "
@@ -161,6 +169,20 @@ with tab1:
                      labels={"monto": "Monto", "etiqueta": "Origen"})
         fig.update_traces(marker_color="#c9a227")
         cg2.plotly_chart(fig, width="stretch")
+
+    if not top_montos.empty and "pct_del_total" in top_montos.columns:
+        with st.expander("📋 Ranking de mayores cifras digitalizadas (% del total)"):
+            rk = top_montos.head(15).rename(columns={
+                "pagina": "Página", "monto": "Monto (S/)",
+                "pct_del_total": "% del total",
+            })
+            st.dataframe(
+                rk, hide_index=True, width="stretch",
+                column_config={
+                    "Monto (S/)": st.column_config.NumberColumn(format="S/ %.2f"),
+                    "% del total": st.column_config.NumberColumn(format="%.2f%%"),
+                },
+            )
 
     st.caption("ℹ️ Las épocas 1964 y 2025 se presentan como resúmenes "
                "independientes (sin comparación cross-época).")
@@ -193,17 +215,41 @@ with tab2:
         fig.update_layout(height=600, margin=dict(l=0, r=0, t=40, b=0))
         st.plotly_chart(fig, width="stretch")
 
-        st.markdown("#### Estancamiento presupuestal por departamento")
-        st.caption("Saldo No Devengado = recursos asignados que no se ejecutaron "
-                   "(proxy de estancamiento). Una capa futura puede cruzarlo con "
-                   "indicadores de vulnerabilidad social.")
-        top_saldo = d.sort_values("saldo_no_devengado", ascending=False).head(12)
-        fig2 = px.bar(top_saldo.sort_values("saldo_no_devengado"),
-                      x="saldo_no_devengado", y="departamento", orientation="h",
-                      labels={"saldo_no_devengado": "Saldo No Devengado (S/)",
-                              "departamento": ""})
-        fig2.update_traces(marker_color="#C8102E")
-        st.plotly_chart(fig2, width="stretch")
+        st.markdown("#### Estancamiento del gasto vs. vulnerabilidad social")
+        vuln = cargar_vulnerabilidad()
+        dv = d.merge(vuln, on="departamento", how="inner")
+        if not dv.empty:
+            r = float(np.corrcoef(dv["hogares_juntos"], dv["avance_pct"])[0, 1])
+            col_g, col_r = st.columns([3, 1])
+            fig2 = px.scatter(
+                dv, x="hogares_juntos", y="avance_pct", size="pim",
+                color="avance_pct", color_continuous_scale="RdYlGn",
+                range_color=(75, 100), hover_name="departamento",
+                labels={"hogares_juntos": "Hogares en JUNTOS (vulnerabilidad)",
+                        "avance_pct": "Avance de ejecución 2025 (%)"},
+            )
+            m, b = np.polyfit(dv["hogares_juntos"], dv["avance_pct"], 1)
+            xs = np.array([dv["hogares_juntos"].min(), dv["hogares_juntos"].max()])
+            fig2.add_scatter(x=xs, y=m * xs + b, mode="lines", name="Tendencia",
+                             line=dict(color="#444", dash="dash"))
+            fig2.update_layout(height=460)
+            col_g.plotly_chart(fig2, width="stretch")
+            col_r.metric("Correlación (Pearson)", f"{r:+.2f}")
+            if r <= -0.3:
+                interp = ("inversa: los departamentos más vulnerables ejecutan "
+                          "**menos** su presupuesto (doble penalidad).")
+            elif r >= 0.3:
+                interp = ("directa: los más vulnerables ejecutan **más** su "
+                          "presupuesto.")
+            else:
+                interp = ("débil: no hay una relación lineal clara entre "
+                          "vulnerabilidad y avance de ejecución.")
+            col_r.caption(f"Avance de ejecución 2025 vs. hogares en pobreza "
+                          f"(JUNTOS). Correlación {interp}")
+            st.caption("Fuente de vulnerabilidad: Programa JUNTOS — hogares "
+                       "afiliados por ubigeo (datosabiertos.gob.pe).")
+        else:
+            st.info("No se pudo cruzar con los datos de vulnerabilidad (JUNTOS).")
     else:
         st.warning("Faltan datos de departamentos o el GeoJSON.")
 

@@ -206,14 +206,24 @@ def procesar(nombre_pdf: str = "cuenta_general_1964.pdf",
     df_pag = pd.DataFrame(por_pagina)
     df_conc = pd.DataFrame(conceptos_all)
 
+    total = float(df_montos["monto"].sum()) if not df_montos.empty else 0.0
+
     # --- Salidas para el dashboard (Tab 1) ---
-    # Gráfico 1: suma de cifras por página (digitalización a lo largo del bloque).
+    # Gráfico 1: suma de cifras por página + su % del total digitalizado.
+    if not df_pag.empty:
+        df_pag["pct_del_total"] = (df_pag["suma_cifras"] / total * 100).round(2) \
+            if total else 0.0
     df_pag.to_parquet(PROCESSED / "ocr_1964_por_pagina.parquet", index=False)
-    # Gráfico 2: las 20 mayores cifras financieras extraídas de 1964.
-    top_montos = (df_montos.sort_values("monto", ascending=False).head(20)
-                  if not df_montos.empty
-                  else pd.DataFrame(columns=["pagina", "monto"]))
+
+    # Gráfico 2 / listado: las 20 mayores cifras + su % del total.
+    if not df_montos.empty:
+        top_montos = df_montos.sort_values("monto", ascending=False).head(20).copy()
+        top_montos["pct_del_total"] = (top_montos["monto"] / total * 100).round(2) \
+            if total else 0.0
+    else:
+        top_montos = pd.DataFrame(columns=["pagina", "monto", "pct_del_total"])
     top_montos.to_parquet(PROCESSED / "ocr_1964_top_montos.parquet", index=False)
+
     # Extra: conceptos legibles emparejados con su monto (best-effort).
     if not df_conc.empty:
         df_conc = (df_conc.sort_values("monto", ascending=False)
@@ -226,8 +236,10 @@ def procesar(nombre_pdf: str = "cuenta_general_1964.pdf",
         "paginas_procesadas": fin - inicio + 1,
         "rango_paginas": f"{inicio}-{fin}",
         "cifras_extraidas": int(len(df_montos)),
-        "suma_total_cifras": float(df_montos["monto"].sum()) if not df_montos.empty else 0.0,
+        "suma_total_cifras": total,
         "cifra_maxima": float(df_montos["monto"].max()) if not df_montos.empty else 0.0,
+        "cifra_promedio": float(df_montos["monto"].mean()) if not df_montos.empty else 0.0,
+        "cifra_mediana": float(df_montos["monto"].median()) if not df_montos.empty else 0.0,
         "conceptos_legibles": int(len(df_conc)),
     }
     (PROCESSED / "ocr_1964_resumen.json").write_text(

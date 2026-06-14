@@ -44,11 +44,19 @@
 | Caché | Básica | Verificada en todas las cargas |
 | Datos | Generados | Verificados de forma cruzada vía MCP |
 
-## 5. Limitaciones y mejoras futuras
+## 5. Mejoras incorporadas (ronda de refinamiento)
+
+- **Descriptivos 1964**: se añadieron **porcentajes** (cada cifra sobre el total),
+  media/mediana y un ranking de mayores cifras en el Tab 1.
+- **Vulnerabilidad social (Tab 2)**: se cruzó el avance de ejecución con los
+  **hogares del programa JUNTOS** por departamento (proxy de pobreza, dataset del
+  propio portal `datosabiertos.gob.pe`, 25/25 departamentos) y se calcula la
+  correlación de Pearson. Hallazgo: relación **débil** (r ≈ +0.09) — la ejecución
+  del gasto no se explica linealmente por la vulnerabilidad.
+
+## 6. Limitaciones y mejoras futuras
 
 - **OCR de nombres 1964**: limitado por la calidad del escaneo; mejorable con
   modelos OCR específicos para documentos históricos.
-- **Mapa de vulnerabilidad**: el Tab 2 podría cruzar el estancamiento con
-  indicadores sociales (INEI) en una capa adicional.
 - **Más periodos**: el pipeline ya admite periodo dinámico (ej. `2025-12`); falta
   poblar otros años en el dashboard.
