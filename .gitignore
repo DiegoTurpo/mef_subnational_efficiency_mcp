@@ -1,0 +1,29 @@
+# ─── Python ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.python-version
+
+# ─── Datos pesados (se descargan/regeneran localmente) ─────
+# PDFs crudos de 1964 y CSVs grandes del MEF NO se versionan.
+data/raw_pdfs/*.pdf
+data/raw_csv/
+data/ocr_cache/
+
+# Las salidas "microscópicas" SÍ se versionan (Regla 1 anti-flooding):
+#   data/processed/*.parquet  y  data/snapshots/*  quedan trackeados.
+
+# ─── Streamlit ────────────────────────────────────────────
+.streamlit/secrets.toml
+
+# ─── SO / IDE ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Mantener carpetas vacías
+!**/.gitkeep

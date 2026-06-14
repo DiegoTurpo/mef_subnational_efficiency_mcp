@@ -1,0 +1,24 @@
+# ============================================================
+#  mef_subnational_efficiency_mcp — dependencias (Python 3.12)
+#  PaddleOCR NO soporta Python 3.14; usar siempre py -3.12.
+# ============================================================
+
+# --- Servidor MCP local ---
+mcp>=1.2.0
+
+# --- Cliente HTTP (API CKAN del portal) ---
+httpx>=0.27.0
+
+# --- Motor de datos / transformación ---
+duckdb>=1.1.0
+pandas>=2.2.0
+pyarrow>=16.0.0
+
+# --- Dashboard + gráficos ---
+streamlit>=1.38.0
+plotly>=5.24.0
+
+# --- OCR histórico 1964 ---
+paddleocr>=2.7.0
+paddlepaddle>=2.6.0
+pymupdf>=1.24.0
