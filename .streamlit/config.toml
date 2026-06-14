@@ -1,0 +1,10 @@
+# Tema base del dashboard. El Evaluator afina colores/estilos en su branch.
+[theme]
+primaryColor = "#C8102E"          # rojo de la bandera del Perú
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F4F4F6"
+textColor = "#1A1A1A"
+font = "sans serif"
+
+[server]
+headless = true
