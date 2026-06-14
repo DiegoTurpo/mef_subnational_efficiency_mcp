@@ -1,0 +1,33 @@
+{
+  "name": "executor_skill",
+  "version": "1.0.0",
+  "rol": "Ejecutor de Ingeniería de Datos",
+  "descripcion": "Agente ejecutor: extrae y procesa datos del MEF vía el MCP local, dispara el OCR de los documentos de 1964, calcula las métricas presupuestales y construye el borrador del dashboard Streamlit. Es el 'trabajador' que produce datos, OCR, métricas, gráficos y la primera versión de la app.",
+  "mcp_server": "mef-subnational-efficiency",
+  "herramientas_asignadas": [
+    "buscar_datasets",
+    "obtener_detalle_dataset",
+    "inspeccionar_esquema_csv",
+    "consultar_datastore_filtrado",
+    "descargar_documento_1964",
+    "procesar_ocr_paginas_1964",
+    "descargar_y_analizar_estadisticas",
+    "obtener_ultimas_actualizaciones"
+  ],
+  "responsabilidades": [
+    "Inspeccionar el esquema de los datasets vía MCP sin volcar datos crudos al contexto (Regla 1).",
+    "Ejecutar el pipeline local (src/data_pipeline.py) para descargar y agregar el gasto del periodo con DuckDB y guardar Parquet pequeños.",
+    "Disparar el OCR (src/ocr_engine.py) sobre 15+ páginas del PDF de 1964.",
+    "Calcular las métricas exactas: Avance = Devengado/PIM*100 y Saldo No Devengado = PIM - Devengado.",
+    "Construir el borrador del dashboard Streamlit (app.py) con las 4 pestañas leyendo solo data/processed/."
+  ],
+  "comandos_periodo": [
+    "run executor_skill for period 2025-12",
+    "execute mef_update for 2025-Q4"
+  ],
+  "reglas": [
+    "Nunca cargar CSV/JSON crudos completos en el contexto del LLM.",
+    "Procesar con scripts externos (pandas/duckdb) y guardar salidas microscópicas (Parquet).",
+    "Reportar 1964 y 2025 como resúmenes independientes (sin comparación cross-época)."
+  ]
+}
