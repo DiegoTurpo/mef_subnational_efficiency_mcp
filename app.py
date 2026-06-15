@@ -246,7 +246,7 @@ with tab2:
                           "vulnerabilidad y avance de ejecución.")
             col_r.caption(f"Avance de ejecución 2025 vs. hogares en pobreza "
                           f"(JUNTOS). Correlación {interp}")
-            st.caption("Fuente de vulnerabilidad: Programa JUNTOS — hogares "
+            st.caption("Fuente de vulnerabilidad: Programa JUNTOS 2025 — hogares "
                        "afiliados por ubigeo (datosabiertos.gob.pe).")
         else:
             st.info("No se pudo cruzar con los datos de vulnerabilidad (JUNTOS).")

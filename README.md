@@ -27,6 +27,9 @@ ejecución presupuestal **2025** del MEF y digitaliza registros históricos de
   `MONTO_PIM`, `MONTO_DEVENGADO_ANUAL`, departamento, pliego, etc.).
 - **1964:** PDF de la *Cuenta General de la República (1964)* →
   `data/raw_pdfs/cuenta_general_1964.pdf` (descarga manual).
+- **Vulnerabilidad social (Tab 2):** dataset *“Resumen de Hogares afiliados…
+  Programa JUNTOS 2025”* del portal `datosabiertos.gob.pe` (hogares en pobreza
+  por departamento, proxy de vulnerabilidad).
 - **Geo:** `peru_departamental_simple.geojson` (repo `juaneladio/peru-geojson`).
 
 ## Métricas
@@ -49,11 +52,14 @@ mef_subnational_efficiency_mcp/
 │   ├── data_pipeline.py      # Ingesta 2025 (DuckDB → Parquet)
 │   ├── ocr_engine.py         # OCR de 1964 (PaddleOCR + PyMuPDF)
 │   ├── analytical_engine.py  # Métricas (Avance, Saldo No Devengado)
+│   ├── vulnerabilidad.py     # Vulnerabilidad por depto (JUNTOS 2025)
 │   └── utils.py              # Cliente CKAN + helpers
 ├── data/
 │   ├── raw_pdfs/             # PDF crudo de 1964 (no versionado)
 │   ├── snapshots/            # Muestras de esquema (5–10 filas)
+│   ├── geo/                  # GeoJSON de departamentos del Perú
 │   └── processed/            # Salidas Parquet "microscópicas"
+├── docs/evaluator_report.md  # Reporte de auditoría del Evaluator (Tab 4)
 └── video/link.txt            # Enlace del video de presentación
 ```
 
