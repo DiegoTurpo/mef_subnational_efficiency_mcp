@@ -12,6 +12,7 @@ from __future__ import annotations
 import io
 import sys
 import unicodedata
+import urllib.parse
 from pathlib import Path
 
 import pandas as pd
@@ -21,7 +22,8 @@ import utils
 
 ROOT = Path(__file__).resolve().parents[1]
 PROCESSED = ROOT / "data" / "processed"
-SLUG = "resumen-de-hogares-afiliados-y-abonados-por-ubigeo-2024-programa-juntos"
+# Se usa el año 2025 para mantener los Tabs 2–4 con datos exclusivamente de 2025.
+SLUG = "resumen-de-hogares-afiliados-y-abonados-por-ubigeo-2025-programa-juntos"
 
 # JUNTOS usa "CALLAO"; el gasto del MEF usa el nombre largo.
 _NORM = {"CALLAO": "PROVINCIA CONSTITUCIONAL DEL CALLAO"}
@@ -35,15 +37,17 @@ def _sin_acentos(s: str) -> str:
 
 
 def _url_xlsx() -> str:
+    """URL del xlsx de JUNTOS: el primer bimestre disponible (más reciente y
+    estable). Tolera nombres con espacios codificados en la URL."""
     d = utils.get_dataset(SLUG)
-    for r in d.get("resources", []):
-        u = r.get("url", "")
-        if u.lower().endswith(".xlsx") and "bimestre_I_2024" in u:
+    xlsx = [r.get("url", "") for r in d.get("resources", [])
+            if r.get("url", "").lower().endswith(".xlsx")]
+    # Preferir un archivo de "bimestre" (evita resúmenes agregados sueltos).
+    for u in xlsx:
+        if "bimestre" in urllib.parse.unquote(u).lower():
             return u
-    # fallback: primer xlsx disponible
-    for r in d.get("resources", []):
-        if r.get("url", "").lower().endswith(".xlsx"):
-            return r["url"]
+    if xlsx:
+        return xlsx[0]
     raise RuntimeError("No se encontró el xlsx de JUNTOS en el portal.")
 
 

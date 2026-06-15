@@ -49,9 +49,9 @@
 - **Descriptivos 1964**: se añadieron **porcentajes** (cada cifra sobre el total),
   media/mediana y un ranking de mayores cifras en el Tab 1.
 - **Vulnerabilidad social (Tab 2)**: se cruzó el avance de ejecución con los
-  **hogares del programa JUNTOS** por departamento (proxy de pobreza, dataset del
-  propio portal `datosabiertos.gob.pe`, 25/25 departamentos) y se calcula la
-  correlación de Pearson. Hallazgo: relación **débil** (r ≈ +0.09) — la ejecución
+  **hogares del programa JUNTOS 2025** por departamento (proxy de pobreza, dataset
+  del propio portal `datosabiertos.gob.pe`, 25/25 departamentos) y se calcula la
+  correlación de Pearson. Hallazgo: relación **débil** (r ≈ +0.12) — la ejecución
   del gasto no se explica linealmente por la vulnerabilidad.
 
 ## 6. Limitaciones y mejoras futuras
